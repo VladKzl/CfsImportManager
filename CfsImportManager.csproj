@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="~%24Склад 18 КВИ 090323 v150323.xlsx" />
+    <None Remove="~%24Склад 18 КВИ 090323 v210323_2.xlsx" />
+    <None Remove="~%24Склад 18 КВИ 090323 v22.03.2023.xlsx" />
+    <None Remove="~%24Склад 18 КВИ 090323.xlsx" />
+    <None Remove="Новый текстовый документ.txt" />
+    <None Remove="Склад 18 КВИ 090323 v150323.xlsx" />
+    <None Remove="Склад 18 КВИ 090323 v210323_2.xlsx" />
+    <None Remove="Склад 18 КВИ 090323 v22.03.2023.xlsx" />
+    <None Remove="Склад 18 КВИ 090323.xlsx" />
+    <None Remove="Склад_с формулами.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.100.3" />
+    <PackageReference Include="Npgsql" Version="7.0.2" />
+  </ItemGroup>
+
+</Project>

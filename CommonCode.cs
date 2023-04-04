@@ -11,7 +11,7 @@ namespace CfsImportManager
         public static void GetPercent(Int32 max, Int32 min, string args = null)
         {
             Int32 percent = (Int32)(min / (max / 100M));
-            Console.Write($"\r{args} {percent}%");
+            Console.Write($"\r{args} {percent-1}%");
             if (percent == 100)
                 Console.WriteLine();
         }

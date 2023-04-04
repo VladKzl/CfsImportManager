@@ -51,6 +51,7 @@ namespace CfsImportManager
             {
                 CommonTableInfo tableInfo = new CommonTableInfo();
                 tableInfo.Queue = (int)tableCell.CellRight().Value;
+                tableInfo.Type = TableInfoBase.TableType.Common;
                 tableInfo.DoublesColumn = tableCell.CellRight(2).Value.ToString();
                 tableInfo.IdUpdateColumn = tableCell.CellRight(3).Value.ToString();
                 tableInfo.TableName = tableCell.Value.ToString();
@@ -59,7 +60,6 @@ namespace CfsImportManager
 
                 CommonTablesInfos.Add(tableInfo);
             }
-
         }
         private void CreateMainTablesInfos()
         {
@@ -67,10 +67,10 @@ namespace CfsImportManager
             {
                 MainTableInfo tableInfo = new MainTableInfo();
                 tableInfo.Queue = (int)tableCell.CellRight().Value;
+                tableInfo.Type = TableInfoBase.TableType.Main;
                 tableInfo.DoublesColumn = tableCell.CellRight(2).Value.ToString();
                 tableInfo.IdUpdateColumn = tableCell.CellRight(3).Value.ToString();
                 tableInfo.TableName = tableCell.Value.ToString();
-                tableInfo.DefaultWorksheet = WorkbookTrimmed.Worksheets.Single(x => x.Name == tableCell.Value.ToString());
                 tableInfo.TrimmedWorksheet = GetTrimmedWorksheet(tableCell);
                 tableInfo.RowsUsedCount = tableInfo.TrimmedWorksheet.RowsUsed().Count();
                 tableInfo.ReferenceTablesCells = SetRefenceTablesCells((string)tableCell.Value);
@@ -91,10 +91,10 @@ namespace CfsImportManager
                 {
                     ReferenceTableInfo tableInfo = new ReferenceTableInfo();
                     tableInfo.Queue = (int)tableCell.CellRight().Value;
+                    tableInfo.Type = TableInfoBase.TableType.Reference;
                     tableInfo.TableName = tableCell.Value.ToString();
                     tableInfo.DoublesColumn = tableCell.CellRight(2).Value.ToString();
                     tableInfo.IdUpdateColumn = tableCell.CellRight(3).Value.ToString();
-                    tableInfo.DefaultWorksheet = WorkbookTrimmed.Worksheets.Single(x => x.Name == tableCell.Value.ToString());
                     tableInfo.TrimmedWorksheet = GetTrimmedWorksheet(tableCell);
                     tableInfo.RowsUsedCount = tableInfo.TrimmedWorksheet.RowsUsed().Count();
 
@@ -128,6 +128,15 @@ namespace CfsImportManager
             }
             /*var a = worksheet.Row(1).Cells();*/
             return worksheet;
+        }
+        public static void Dispose()
+        {
+            WorkbookDefault.Dispose();
+            WorkbookTrimmed.Dispose();
+            CommonTablesCells.Clear();
+            MainTablesCells.Clear();
+            CommonTablesInfos.Clear();
+            MainTablesInfos.Clear();
         }
     }
 }

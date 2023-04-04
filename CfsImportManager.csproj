@@ -11,12 +11,19 @@
     <None Remove="~%24Склад 18 КВИ 090323 v150323.xlsx" />
     <None Remove="~%24Склад 18 КВИ 090323 v210323_2.xlsx" />
     <None Remove="~%24Склад 18 КВИ 090323 v22.03.2023.xlsx" />
+    <None Remove="~%24Склад 18 КВИ 090323 v280323.xlsx" />
     <None Remove="~%24Склад 18 КВИ 090323.xlsx" />
+    <None Remove="~%24Склад 18 КВИ v030423.xlsx" />
     <None Remove="Новый текстовый документ.txt" />
     <None Remove="Склад 18 КВИ 090323 v150323.xlsx" />
     <None Remove="Склад 18 КВИ 090323 v210323_2.xlsx" />
     <None Remove="Склад 18 КВИ 090323 v22.03.2023.xlsx" />
+    <None Remove="Склад 18 КВИ 090323 v280323.xlsx" />
+    <None Remove="Склад 18 КВИ 090323 v290323 ПК и миниПК.xlsx" />
+    <None Remove="Склад 18 КВИ 090323 v300323.XLSX" />
     <None Remove="Склад 18 КВИ 090323.xlsx" />
+    <None Remove="Склад 18 КВИ v030423.xlsx" />
+    <None Remove="Склад 18 КВИ v310323.xlsx" />
     <None Remove="Склад_с формулами.xlsx" />
   </ItemGroup>
 

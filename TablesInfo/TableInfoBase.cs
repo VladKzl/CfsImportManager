@@ -9,7 +9,14 @@ namespace CfsImportManager.TablesInfo
 {
     public class TableInfoBase
     {
+        public enum TableType
+        {
+            Main,
+            Common,
+            Reference
+        }
         public int Queue { get; set; }
+        public TableType Type { get; set; }
         public string DoublesColumn { get; set; }
         public string IdUpdateColumn { get; set; }
         public string TableName { get; set; }
@@ -19,6 +26,7 @@ namespace CfsImportManager.TablesInfo
         public IXLCell GetRowsCellFromTrimmed(int rowIndex, string columnName)
         {
             int lastCell = TrimmedWorksheet.ColumnsUsed().Count();
+            var test = TrimmedWorksheet.RowsUsed().ElementAt(rowIndex).Cells(1, lastCell);//
             return TrimmedWorksheet.RowsUsed().ElementAt(rowIndex).Cells(1, lastCell).Single(x => (string)x.WorksheetColumn().Cell(1).Value == columnName);
         }
         public IXLRow GetRowFromTrimmed(string columnName, string uiniqueCellValue)
@@ -29,6 +37,7 @@ namespace CfsImportManager.TablesInfo
         public bool IsColumnExistsFromTrimmed(string columnName)
         {
             int lastCell = TrimmedWorksheet.ColumnsUsed().Count();
+            var test = TrimmedWorksheet.Row(1);//
             return TrimmedWorksheet.Row(1).Cells(1, lastCell).Any(x => (string)x.Value == columnName);
         }
         public IXLCell GetRowsCellFromDefault(int rowIndex, string columnName)

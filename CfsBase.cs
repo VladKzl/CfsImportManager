@@ -19,13 +19,16 @@ namespace CfsImportManager
             DataTable.TableName = tableName;
             Connection = new NpgsqlConnection(cfsConnectionString);
             DataAdapter = new NpgsqlDataAdapter($"select * from {tableName}", Connection);
-            /*            DataAdapter.MissingMappingAction = MissingMappingAction.Error;
-                        DataAdapter.MissingSchemaAction = MissingSchemaAction.Error;*/
+            /*DataAdapter.MissingMappingAction = MissingMappingAction.Error;
+            DataAdapter.MissingSchemaAction = MissingSchemaAction.Error;*/
 
             SqlCommandBuilder = new NpgsqlCommandBuilder(DataAdapter);
             DataAdapter.DeleteCommand = SqlCommandBuilder.GetDeleteCommand(true);
             DataAdapter.UpdateCommand = SqlCommandBuilder.GetUpdateCommand(true);
             DataAdapter.InsertCommand = SqlCommandBuilder.GetInsertCommand(true);
+
+            DataAdapter.RowUpdating += new NpgsqlRowUpdatingEventHandler(OnRowUpdating);
+            DataAdapter.RowUpdated += new NpgsqlRowUpdatedEventHandler(OnRowUpdated);
 
             DataAdapter.FillSchema(DataTable, SchemaType.Source);
             DataAdapter.Fill(DataTable);
@@ -39,9 +42,7 @@ namespace CfsImportManager
         {
             existingRow = DataTable.AsEnumerable().Where(x => x.Field<string>(mainColumn) == searchedValue).ToList();
             if (existingRow != null & existingRow.Count() != 0)
-            {
                 return true;
-            }
             return false;
         }
         public void Dispose()
@@ -54,6 +55,22 @@ namespace CfsImportManager
             DataAdapter.Dispose();
             DataAdapter.Dispose();
             SqlCommandBuilder.Dispose();
+        }
+        public void OnRowUpdating(object sender, NpgsqlRowUpdatingEventArgs args)
+        {
+            if (args.Status == UpdateStatus.ErrorsOccurred)
+            {
+                args.Row.RowError = args.Errors.Message;
+                args.Status = UpdateStatus.SkipCurrentRow;
+            }
+        }
+        public void OnRowUpdated(object sender, NpgsqlRowUpdatedEventArgs args)
+        {
+            if (args.Status == UpdateStatus.ErrorsOccurred)
+            {
+                args.Row.RowError = args.Errors.Message;
+                args.Status = UpdateStatus.SkipCurrentRow;
+            }
         }
     }
 }

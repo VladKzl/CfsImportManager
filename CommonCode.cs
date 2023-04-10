@@ -15,6 +15,12 @@ namespace CfsImportManager
             if (percent == 100)
                 Console.WriteLine();
         }
+        public static void GetProgress(int current, int max)
+        {
+            Console.Write($"\rОбработано - {current}/{max}");
+            if (current >= max)
+                Console.WriteLine();
+        }
         public static bool UserValidationPlusOrMinus(string plusText, string minusText)
         {
             bool userActionBool = true;

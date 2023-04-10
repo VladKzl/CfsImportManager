@@ -18,7 +18,7 @@ namespace CfsImportManager
         public List<(string doubledValue, int nextValue)> DoublesCounter { get; set; } = new List<(string doubledValue, int nextValue)>();
         public void FillDbTable(TableInfoBase tableInfo, string cfsConnectionString)
         {
-            Build(tableInfo.TableName, cfsConnectionString);
+            Rebuild(tableInfo.TableName, cfsConnectionString);
 
             for (int i = 1; i < tableInfo.RowsUsedCount; i++)
             {
@@ -45,14 +45,14 @@ namespace CfsImportManager
                 else
                 {
                     AddNewRow();
-/*                    DataAdapter.Update(DataTable);
-                    DataTable.AcceptChanges();*/
+                    DataAdapter.Update(DataTable);
+                    DataTable.AcceptChanges();
                 }
-                CommonCode.GetPercent(i, tableInfo.RowsUsedCount);
+                CommonCode.GetProgress(i, tableInfo.RowsUsedCount);
 
                 void FindeDoubles()
                 {
-                    string searchedValue = tableInfo.GetRowsCellFromTrimmed(i, tableInfo.DoublesColumn).CachedValue.ToString();
+                    string searchedValue = tableInfo.GetXLCellFromRow(i, tableInfo.DoublesColumn).CachedValue.ToString();
 
                     List<DataRow> existingRows;
                     IsColumnValueExists(tableInfo.DoublesColumn, searchedValue, out existingRows);
@@ -148,6 +148,7 @@ namespace CfsImportManager
                 ChangeStatusNonSortedToApplyed();
             DataAdapter.Update(DataTable);
             DataTable.AcceptChanges();
+            LogFailedRows();
 
             void ChangeStatusNonSortedToApplyed()
             {
@@ -158,12 +159,14 @@ namespace CfsImportManager
                 foreach (DataColumn column in DataTable.Columns)
                 {
                     string columnName = column.ColumnName;
-                    if (!tableInfo.IsColumnExistsFromTrimmed(columnName))
-                    {
-                        /*Console.WriteLine($"Колонка {columnName} таблицы {tableInfo.TableName} не найдена в той же таблице в ДБ");*/
+
+                    if (!tableInfo.IsXLColumnExists(columnName))
                         continue;
-                    }
-                    var cellValue = tableInfo.GetRowsCellFromTrimmed(i, columnName).CachedValue;
+                    var cell = tableInfo.GetXLCellFromRow(i, columnName);
+                    if (tableInfo.IsSealed(cell))
+                        continue;
+                    cell.InvalidateFormula();// Ключевой момент с проблемой получения blank
+                    var cellValue = cell.CachedValue;
                     if (cellValue.IsText)
                     {
                         row.SetField(columnName, cellValue.ToString());
@@ -182,17 +185,28 @@ namespace CfsImportManager
                     }
                 }
             }
+            void LogFailedRows()
+            {
+                if (DataTable.HasErrors)
+                {
+                    foreach(DataRow errorRow in DataTable.GetErrors())
+                    {
+                        Console.WriteLine($"{errorRow} - {errorRow.RowError}");
+                    }
+                }
+            }
+
         }
         public void UpdateExcelTable(TableInfoBase tableInfo, string cfsConnectionString, string excelPath)
         {
-            Console.WriteLine("Начали синхронизацию экселя с db");
+            Console.WriteLine("Синхронизируем id");
             Rebuild(tableInfo.TableName, cfsConnectionString);
             DoublesCounter.Clear();
-            tableInfo.DefaultWorksheet = ExcelBase.WorkbookDefault.Worksheets.Single(x => x.Name == tableInfo.TableName);
+            /*tableInfo.Worksheet = ExcelBase.Workbook.Worksheets.Single(x => x.Name == tableInfo.TableName);*/
 
             for (int i = 1; i < tableInfo.RowsUsedCount; i++)
             {
-                string searchedValue = tableInfo.GetRowsCellFromDefault(i, tableInfo.IdUpdateColumn).CachedValue.ToString();
+                string searchedValue = tableInfo.GetXLCellFromRow(i, tableInfo.IdUpdateColumn).CachedValue.ToString();
 
                 List<DataRow> existingRows;
                 if (!IsColumnValueExists(tableInfo.IdUpdateColumn, searchedValue, out existingRows))
@@ -205,7 +219,7 @@ namespace CfsImportManager
                 else
                     UpdateOtherTables();
 
-                CommonCode.GetPercent(i, tableInfo.RowsUsedCount);
+                CommonCode.GetProgress(i, tableInfo.RowsUsedCount);
 
                 void Update_ce_computer()
                 {
@@ -216,7 +230,7 @@ namespace CfsImportManager
                         return;
 
                     int dbRowId = oldesRow.Field<int>("id");
-                    tableInfo.GetRowsCellFromDefault(i, "id").Value = dbRowId;
+                    tableInfo.GetXLCellFromRow(i, "id").Value = dbRowId;
 
                     DoublesCounter.Add((searchedValue, 0));
                 }
@@ -228,7 +242,7 @@ namespace CfsImportManager
                     try
                     {
                         int dbRowId = existingRows[nextRow].Field<int>("id");
-                        tableInfo.GetRowsCellFromDefault(i, "id").Value = dbRowId;
+                        tableInfo.GetXLCellFromRow(i, "id").Value = dbRowId;
 
                         DoublesCounter.Remove((searchedValue, nextRow));
                         DoublesCounter.Add((searchedValue, nextRow + 1));
@@ -236,7 +250,7 @@ namespace CfsImportManager
                     catch { }
                 }
             }
-            ExcelBase.WorkbookDefault.Save();
+            ExcelBase.Workbook.Save();
             Dispose();
         }
     }

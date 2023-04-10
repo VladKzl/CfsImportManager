@@ -14,30 +14,30 @@ namespace CfsImportManager
     {
         public ExcelBase(string excelPath)
         {
-            WorkbookDefault = new XLWorkbook(excelPath);
-            WorkbookTrimmed = new XLWorkbook(excelPath);
-            SettingsWorksheetTrimmed = WorkbookTrimmed.Worksheets.Single(x => x.Name == "Настройки");
+            Workbook = new XLWorkbook(excelPath);
+            Workbook.RecalculateAllFormulas();
+
+            SettingsWorksheet = Workbook.Worksheets.Single(x => x.Name == "Настройки");
             SetCommonTablesCells();
             SetMainTablesCells();
             CreateCommonTablesInfos();
             CreateMainTablesInfos();
         }
-        public static XLWorkbook WorkbookDefault { get; set; }
-        public static XLWorkbook WorkbookTrimmed { get; set; }
-        public static IXLWorksheet SettingsWorksheetTrimmed { get; set; }
+        public static XLWorkbook Workbook { get; set; }
+        public static IXLWorksheet SettingsWorksheet { get; set; }
         public static List<IXLCell> CommonTablesCells { get; set; } = new List<IXLCell>();
         public static List<IXLCell> MainTablesCells { get; set; } = new List<IXLCell>();
         public static List<CommonTableInfo> CommonTablesInfos { get; set; } = new List<CommonTableInfo>();
         public static List<MainTableInfo> MainTablesInfos { get; set; } = new List<MainTableInfo>();
         private void SetCommonTablesCells()
         {
-            var firstCell = SettingsWorksheetTrimmed.Search("Общие таблицы").First().CellBelow();
+            var firstCell = SettingsWorksheet.Search("Общие таблицы").First().CellBelow();
             var lastCell = firstCell.WorksheetColumn().LastCellUsed();
-            CommonTablesCells = SettingsWorksheetTrimmed.Range(firstCell, lastCell).Cells().ToList();
+            CommonTablesCells = SettingsWorksheet.Range(firstCell, lastCell).Cells().ToList();
         }
         private void SetMainTablesCells()
         {
-            var firstCell = SettingsWorksheetTrimmed.Search("Основная таблица").First().CellRight();
+            var firstCell = SettingsWorksheet.Search("Основная таблица").First().CellRight();
             do
             {
                 MainTablesCells.Add(firstCell);
@@ -50,13 +50,14 @@ namespace CfsImportManager
             foreach(var tableCell in CommonTablesCells)
             {
                 CommonTableInfo tableInfo = new CommonTableInfo();
+                tableInfo.TableCell = tableCell;
                 tableInfo.Queue = (int)tableCell.CellRight().Value;
                 tableInfo.Type = TableInfoBase.TableType.Common;
                 tableInfo.DoublesColumn = tableCell.CellRight(2).Value.ToString();
                 tableInfo.IdUpdateColumn = tableCell.CellRight(3).Value.ToString();
                 tableInfo.TableName = tableCell.Value.ToString();
-                tableInfo.TrimmedWorksheet = GetTrimmedWorksheet(tableCell);
-                tableInfo.RowsUsedCount = tableInfo.TrimmedWorksheet.RowsUsed().Count();
+                tableInfo.Worksheet = Workbook.Worksheets.Single(x => x.Name == tableCell.Value.ToString());
+                tableInfo.RowsUsedCount = tableInfo.Worksheet.RowsUsed().Count();
 
                 CommonTablesInfos.Add(tableInfo);
             }
@@ -66,13 +67,14 @@ namespace CfsImportManager
             foreach (var tableCell in MainTablesCells)
             {
                 MainTableInfo tableInfo = new MainTableInfo();
+                tableInfo.TableCell = tableCell;
                 tableInfo.Queue = (int)tableCell.CellRight().Value;
                 tableInfo.Type = TableInfoBase.TableType.Main;
                 tableInfo.DoublesColumn = tableCell.CellRight(2).Value.ToString();
                 tableInfo.IdUpdateColumn = tableCell.CellRight(3).Value.ToString();
                 tableInfo.TableName = tableCell.Value.ToString();
-                tableInfo.TrimmedWorksheet = GetTrimmedWorksheet(tableCell);
-                tableInfo.RowsUsedCount = tableInfo.TrimmedWorksheet.RowsUsed().Count();
+                tableInfo.Worksheet = Workbook.Worksheets.Single(x => x.Name == tableCell.Value.ToString());
+                tableInfo.RowsUsedCount = tableInfo.Worksheet.RowsUsed().Count();
                 tableInfo.ReferenceTablesCells = SetRefenceTablesCells((string)tableCell.Value);
                 tableInfo.ReferenceTables = SetReferenceTables(tableInfo.ReferenceTablesCells);
 
@@ -80,9 +82,9 @@ namespace CfsImportManager
             }
             List<IXLCell> SetRefenceTablesCells(string mainTableName)
             {
-                var firstCell = SettingsWorksheetTrimmed.Search(mainTableName).First().CellBelow();
+                var firstCell = SettingsWorksheet.Search(mainTableName).First().CellBelow();
                 var lastCell = firstCell.WorksheetColumn().LastCellUsed();
-                return SettingsWorksheetTrimmed.Range(firstCell, lastCell).Cells().ToList();
+                return SettingsWorksheet.Range(firstCell, lastCell).Cells().ToList();
             }
             List<ReferenceTableInfo> SetReferenceTables(List<IXLCell> tablesCells)
             {
@@ -90,49 +92,23 @@ namespace CfsImportManager
                 foreach (var tableCell in tablesCells)
                 {
                     ReferenceTableInfo tableInfo = new ReferenceTableInfo();
+                    tableInfo.TableCell = tableCell;
                     tableInfo.Queue = (int)tableCell.CellRight().Value;
                     tableInfo.Type = TableInfoBase.TableType.Reference;
                     tableInfo.TableName = tableCell.Value.ToString();
                     tableInfo.DoublesColumn = tableCell.CellRight(2).Value.ToString();
                     tableInfo.IdUpdateColumn = tableCell.CellRight(3).Value.ToString();
-                    tableInfo.TrimmedWorksheet = GetTrimmedWorksheet(tableCell);
-                    tableInfo.RowsUsedCount = tableInfo.TrimmedWorksheet.RowsUsed().Count();
+                    tableInfo.Worksheet = Workbook.Worksheets.Single(x => x.Name == tableCell.Value.ToString());
+                    tableInfo.RowsUsedCount = tableInfo.Worksheet.RowsUsed().Count();
 
                     referenceTables.Add(tableInfo);
                 }
                 return referenceTables;
             }
         }
-        private IXLWorksheet GetTrimmedWorksheet(IXLCell tableCell)
-        {
-            //fontName
-            //ff92d050 - зеленый
-            //ffb2b2b2 - серый
-            //Логика усложнена так как цвета глючат.
-            var worksheet = WorkbookTrimmed.Worksheets.Single(x => x.Name == tableCell.Value.ToString());
-            var firstRowCells = worksheet.Row(1).Cells().ToList();
-            foreach (var cell in firstRowCells)
-            {
-                try
-                {
-                    if (cell.Style.Fill.BackgroundColor.Color.Name != "ff92d050" && cell.Style.Fill.BackgroundColor.Color.Name != "ffb2b2b2")
-                    {
-                        cell.WorksheetColumn().Delete();
-                    }
-                }
-                catch
-                {
-                    cell.WorksheetColumn().Delete();
-                    continue;
-                }
-            }
-            /*var a = worksheet.Row(1).Cells();*/
-            return worksheet;
-        }
         public static void Dispose()
         {
-            WorkbookDefault.Dispose();
-            WorkbookTrimmed.Dispose();
+            Workbook.Dispose();
             CommonTablesCells.Clear();
             MainTablesCells.Clear();
             CommonTablesInfos.Clear();

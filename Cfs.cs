@@ -195,7 +195,6 @@ namespace CfsImportManager
                     }
                 }
             }
-
         }
         public void UpdateExcelTable(TableInfoBase tableInfo, string cfsConnectionString, string excelPath)
         {

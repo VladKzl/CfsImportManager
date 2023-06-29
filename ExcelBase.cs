@@ -15,7 +15,7 @@ namespace CfsImportManager
         public ExcelBase(string excelPath)
         {
             Workbook = new XLWorkbook(excelPath);
-            Workbook.RecalculateAllFormulas();
+            /*Workbook.RecalculateAllFormulas();*/
 
             SettingsWorksheet = Workbook.Worksheets.Single(x => x.Name == "Настройки");
             SetCommonTablesCells();

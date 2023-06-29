@@ -62,9 +62,11 @@ namespace CfsImportManager.TablesInfo
             //Логика усложнена так как цвета глючат.
             try
             {
-                if (cell.WorksheetColumn().Cell(1).Style.Fill.BackgroundColor.Color.Name != "ff92d050" 
-                                           && cell.Style.Fill.BackgroundColor.Color.Name != "ffb2b2b2")
-                    return true;
+                var cellTest = cell.WorksheetColumn().Cell(1);
+                if(cellTest.Style.Fill.BackgroundColor.Color.Name == "ff92d050")
+                    return false;
+                if (cellTest.Style.Fill.BackgroundColor.Color.Name == "ffb2b2b2")
+                    return false;
             }
             catch
             {

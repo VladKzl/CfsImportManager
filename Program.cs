@@ -1,8 +1,9 @@
 ﻿using CfsImportManager;
 using CfsImportManager.TablesInfo;
 
-string excelPath = "B:\\ДИИТ\\Severcart\\Склад 18 КВИ актуальный.xlsx";
-/*string excelPath = "D:\\ascon_obmen\\kozlov_vi\\Учет орг.техники\\CfsImportManager\\Склад 18 КВИ актуальный.xlsx";*/
+string excelPath = "B:\\ДИИТ\\Severcart\\Файл импорта.xlsx";
+/*"B:\\ДИИТ\\Severcart\\Файл импорта.xlsx";*/
+/*"D:\\ascon_obmen\\kozlov_vi\\Учет орг.техники\\CfsImportManager\\Файл импорта.xlsx"*/
 string cfsConnectionString = "Server=192.168.0.112;Port=82;Database=severcart;User Id=scuser;Password=new_password2";
 
 InitializeExcel();
@@ -113,7 +114,7 @@ void FillCommonTables()
     do
     {
         /*InitializeExcel();*/
-        ExcelBase.Workbook.RecalculateAllFormulas();
+        /*ExcelBase.Workbook.RecalculateAllFormulas();*/
         if (!persentation)
         {
             ExcelBase.CommonTablesCells.ForEach(x => Console.WriteLine(x.Value));
@@ -123,12 +124,12 @@ void FillCommonTables()
         string manualTableName = Console.ReadLine();
         TableInfoBase tableInfo = ExcelBase.CommonTablesInfos.Single(x => x.TableName == manualTableName);
         
-        var test = tableInfo.Worksheet.Row(5).Cells().ToList().Select(x => x.CachedValue).ToList();//
+        /*var test = tableInfo.Worksheet.Row(5).Cells().ToList().Select(x => x.CachedValue).ToList();*/
 
         cfs.FillDbTable(tableInfo, cfsConnectionString);
         cfs.UpdateExcelTable(tableInfo, cfsConnectionString, excelPath);
 
-        /*ExcelBase.Dispose();*/
+        ExcelBase.Dispose();
         Console.WriteLine("Загрузили.\n");
         continuation = CommonCode.UserValidationPlusOrMinus("Взять следующую","Завершить");
     }
@@ -142,7 +143,7 @@ void FillMainTables()
     do
     {
         /*InitializeExcel();*/
-        ExcelBase.Workbook.RecalculateAllFormulas();
+        /*ExcelBase.Workbook.RecalculateAllFormulas();*/
         if (!persentation)
         {
             ExcelBase.MainTablesCells.ForEach(x => Console.WriteLine(x.Value));
@@ -157,7 +158,7 @@ void FillMainTables()
         cfs.FillDbTable(tableInfo, cfsConnectionString);
         cfs.UpdateExcelTable(tableInfo, cfsConnectionString, excelPath);
 
-        /*ExcelBase.Dispose();*/
+        ExcelBase.Dispose();
         Console.WriteLine("Загрузили.\n");
         continuation = CommonCode.UserValidationPlusOrMinus("Взять следующую", "Завершить");
     }
@@ -173,7 +174,7 @@ void FillReferenceTables()
     string mainTableName = Console.ReadLine();
     do
     {
-        ExcelBase.Workbook.RecalculateAllFormulas();
+        /*ExcelBase.Workbook.RecalculateAllFormulas();*/
 
         if (!persentation)
         {
@@ -192,7 +193,7 @@ void FillReferenceTables()
 
         Console.WriteLine("Загрузили.\n");
         continuation = CommonCode.UserValidationPlusOrMinus("Взять следующую", "Завершить");
-/*        if(continuation)
+        /*        if(continuation)
             InitializeExcel();*/
     }
     while (continuation);
